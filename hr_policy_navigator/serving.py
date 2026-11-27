@@ -40,12 +40,12 @@ class ResponseCache:
         self._lock = threading.Lock()
 
     @staticmethod
-    def key(query: str, strategy: str) -> str:
+    def key(query: str, strategy: str, persona: str = "") -> str:
         norm = re.sub(r"\W+", " ", query.lower()).strip()
-        return hashlib.sha1(f"{strategy}|{norm}".encode()).hexdigest()
+        return hashlib.sha1(f"{strategy}|{persona}|{norm}".encode()).hexdigest()
 
-    def get(self, query: str, strategy: str) -> Optional[Dict[str, Any]]:
-        k = self.key(query, strategy)
+    def get(self, query: str, strategy: str, persona: str = "") -> Optional[Dict[str, Any]]:
+        k = self.key(query, strategy, persona)
         with self._lock:
             item = self.d.get(k)
             if item and self.clock() - item[0] < self.ttl:
@@ -56,10 +56,10 @@ class ResponseCache:
             self.misses += 1
             return None
 
-    def put(self, query: str, strategy: str, result: Dict[str, Any]) -> None:
+    def put(self, query: str, strategy: str, result: Dict[str, Any], persona: str = "") -> None:
         if result.get("status") != "success":
             return
         with self._lock:
-            self.d[self.key(query, strategy)] = (self.clock(), result)
+            self.d[self.key(query, strategy, persona)] = (self.clock(), result)
             while len(self.d) > self.max:
                 self.d.popitem(last=False)

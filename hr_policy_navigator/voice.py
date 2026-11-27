@@ -14,6 +14,7 @@ from __future__ import annotations
 import io
 import logging
 import os
+import sys
 import tempfile
 import threading
 from typing import Optional
@@ -21,10 +22,76 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Thread lock — pyttsx3 engine is not thread-safe; guard with a mutex
+# Thread lock — SAPI5 / pyttsx3 engines are not thread-safe; guard with a mutex
 # ---------------------------------------------------------------------------
 _tts_lock = threading.Lock()
 _tts_engine = None   # lazy-init
+
+
+def _win_sapi_available() -> bool:
+    if sys.platform != "win32":
+        return False
+    try:
+        import pythoncom  # noqa: F401
+        import win32com.client  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _win_sapi_tts(clean: str) -> Optional[bytes]:
+    """Synthesize WAV bytes via Windows SAPI5 directly (avoids pyttsx3/comtypes hangs)."""
+    import pythoncom  # noqa: PLC0415
+    import win32com.client  # noqa: PLC0415
+
+    tmp_path = None
+    voice = None
+    stream = None
+    voices = None
+    en_voices = None
+    pythoncom.CoInitialize()
+    try:
+        voice = win32com.client.Dispatch("SAPI.SpVoice")
+        stream = win32com.client.Dispatch("SAPI.SpFileStream")
+        voice.Rate = 1
+        voice.Volume = 95
+        try:
+            voices = voice.GetVoices()
+            en_voices = [
+                voices.Item(i)
+                for i in range(voices.Count)
+                if "english" in voices.Item(i).GetDescription().lower()
+                or "en-" in voices.Item(i).Id.lower()
+            ]
+            if en_voices:
+                voice.Voice = en_voices[min(1, len(en_voices) - 1)]
+        except Exception:
+            pass
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            tmp_path = tmp.name
+        stream.Open(tmp_path, 3)  # SSFMCreateForWrite = 3
+        voice.AudioOutputStream = stream
+        voice.Speak(clean)
+        stream.Close()
+        with open(tmp_path, "rb") as f:
+            data = f.read()
+        return data if data else None
+    finally:
+        en_voices = None
+        voices = None
+        if voice is not None:
+            try:
+                voice.AudioOutputStream = None
+            except Exception:
+                pass
+        stream = None
+        voice = None
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+        pythoncom.CoUninitialize()
 
 
 def _get_tts_engine():
@@ -51,10 +118,10 @@ def _get_tts_engine():
 
 def text_to_speech(text: str, max_chars: int = 1500) -> Optional[bytes]:
     """
-    Convert text to audio bytes (WAV format) using pyttsx3.
+    Convert text to audio bytes (WAV format) using Windows SAPI5 or pyttsx3.
 
-    Returns WAV bytes on success, None if pyttsx3 is unavailable or fails.
-    Truncates very long answers to max_chars to keep latency under ~5s.
+    Returns WAV bytes on success, None if TTS is unavailable or fails.
+    Truncates very long answers to max_chars to keep latency fast.
     """
     if not text or not text.strip():
         return None
@@ -66,9 +133,16 @@ def text_to_speech(text: str, max_chars: int = 1500) -> Optional[bytes]:
     clean = clean[:max_chars]
 
     with _tts_lock:
+        if _win_sapi_available():
+            try:
+                return _win_sapi_tts(clean)
+            except Exception as exc:
+                logger.warning("Windows SAPI5 TTS failed, falling back to pyttsx3: %s", exc)
+
         engine = _get_tts_engine()
         if engine is None:
             return None
+        tmp_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 tmp_path = tmp.name
@@ -81,10 +155,11 @@ def text_to_speech(text: str, max_chars: int = 1500) -> Optional[bytes]:
             logger.warning("TTS synthesis failed: %s", exc)
             return None
         finally:
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+            if tmp_path:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +186,9 @@ def whisper_available() -> bool:
 
 
 def tts_available() -> bool:
-    """Return True if pyttsx3 is importable."""
+    """Return True if Windows SAPI5 or pyttsx3 is available."""
+    if _win_sapi_available():
+        return True
     try:
         import pyttsx3  # noqa: F401
         return True

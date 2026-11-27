@@ -163,7 +163,7 @@ class Copilot:
         if strategy == "baseline":
             ans, verdict = ans, {"supported": [], "unsupported": [], "invalid_source_ids": [], "all_ok": True, "revised": False}
         else:
-            ans, verdict = self._critic(llm, plan["rewritten_query"], ans, evidence, trace)
+            ans, verdict = self._critic(llm, plan["rewritten_query"], ans, evidence, trace, profile=profile)
         res = self._finalize(ans, verdict, evidence, exec_info)
         self._remember(sid, query, res)
         return res
@@ -298,7 +298,9 @@ class Copilot:
         return max(pool, key=score)
 
     # ---------------------------------------------------------------------- critic
-    def _critic(self, llm, question, ans, evidence, trace):
+    def _critic(self, llm, question, ans, evidence, trace, profile: Dict[str, Any] = None):
+        role = (profile or {}).get("role")
+        tenure = (profile or {}).get("tenure")
         with trace.span("critic", "check") as sp:
             verdict = check_claims(ans.get("claims", []), evidence)
             if ans.get("answerable") and not ans.get("claims"):
@@ -318,7 +320,7 @@ class Copilot:
                                          "text": sanitize_chunk(exp.data)[0][: self.s.context_chars * 2], "score": 0, "stages": {}}
             bad = "; ".join(x["claim"][:80] for x in verdict["unsupported"] + verdict["invalid_source_ids"])
             q2 = f"{question}\n(Critic: these claims were NOT supported by the cited sources: {bad}. Remove or fix them; use only listed source ids.)"
-            ans2 = self._answer_once(llm, "structured", q2, ev2)
+            ans2 = self._answer_once(llm, "structured", q2, ev2, role=role, tenure=tenure)
             v2 = check_claims(ans2.get("claims", []), ev2)
             v2["revised"] = True
             if len(v2["unsupported"]) + len(v2["invalid_source_ids"]) <= len(verdict["unsupported"]) + len(verdict["invalid_source_ids"]):

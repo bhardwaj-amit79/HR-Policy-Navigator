@@ -158,8 +158,13 @@ def _inject_css() -> None:
             background-color: #F8FAFC !important;
         }
         [data-testid="stMainBlockContainer"],
-        [data-testid="stMainBlockContainer"] [data-testid="stVerticalBlock"] {
+        [data-testid="stMainBlockContainer"] > div > [data-testid="stVerticalBlock"],
+        [data-testid="stVerticalBlock"]:has(> div > .st-key-sticky_top_nav) {
             overflow: visible !important;
+        }
+        .st-key-chat_scroll_box {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
         }
         [data-testid="stVerticalBlock"] > div:has(.st-key-sticky_top_nav),
         .st-key-sticky_top_nav {
@@ -394,14 +399,20 @@ def render(
 
     with tts_col:
         if tts_enabled and tts_available() and res.get("answer") and status in ("success", "abstained"):
-            if st.button("Read", icon=":material/volume_up:", key=f"tts_{idx}_{res.get('trace_id', 'x')}",
+            tts_btn_key = f"tts_{idx}_{res.get('trace_id', 'x')}"
+            tts_wav_key = f"tts_wav_{idx}_{res.get('trace_id', 'x')}"
+            just_generated = False
+            if st.button("Read", icon=":material/volume_up:", key=tts_btn_key,
                          help="Read answer aloud"):
                 with st.spinner("Generating audio..."):
                     wav = text_to_speech(res["answer"])
                 if wav:
-                    st.audio(wav, format="audio/wav")
+                    st.session_state[tts_wav_key] = wav
+                    just_generated = True
                 else:
                     st.warning("TTS unavailable on this machine.")
+            if st.session_state.get(tts_wav_key):
+                st.audio(st.session_state[tts_wav_key], format="audio/wav", autoplay=just_generated)
 
     with rlhf_col:
         if feedback_store is not None and res.get("trace_id"):
@@ -818,7 +829,7 @@ def main() -> None:
             )
             st.caption(f"Persona: **{persona_text}** · Strategy: `{strategy}`")
 
-            chat_container = st.container(height=520, border=True)
+            chat_container = st.container(height=520, border=True, key="chat_scroll_box")
             with chat_container:
                 if not st.session_state.log:
                     st.markdown(
@@ -869,7 +880,8 @@ def main() -> None:
                     st.warning(f"Rate limit reached. Please wait {wait:.0f}s.")
                 else:
                     active_profile = user_profile_dict if opt_personalization else None
-                    res = cache.get(final_q, strategy) if len(st.session_state.log) == 0 else None
+                    persona_cache_key = f"{user.role}:{user.tenure}" if opt_personalization else "standard"
+                    res = cache.get(final_q, strategy, persona=persona_cache_key) if len(st.session_state.log) == 0 else None
                     if res is None:
                         with st.spinner("Searching policies..."):
                             try:
@@ -880,7 +892,7 @@ def main() -> None:
                             except TypeError:
                                 res = agent.run(final_q, st.session_state.sid, strategy)
                         if len(st.session_state.log) == 0:
-                            cache.put(final_q, strategy, res)
+                            cache.put(final_q, strategy, res, persona=persona_cache_key)
 
                     st.session_state.log.append((final_q, res))
                     history_store.append(user.user_id, st.session_state.sid, final_q, res)
@@ -987,8 +999,7 @@ def main() -> None:
                     """
                     **How the RLHF loop works:**
                     1. User rates an answer **Helpful** or **Improve** in the Ask tab.
-                    2. Rating and optional correction are saved to `state/feedback_log.jsonl`.
-                    3. This dashboard surfaces low-rated queries as prompt and retrieval improvement candidates.
+                    2. This dashboard surfaces low-rated queries as prompt and retrieval improvement candidates.
                     """
                 )
             else:
