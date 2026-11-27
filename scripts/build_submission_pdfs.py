@@ -1051,7 +1051,7 @@ def build_technical_report_html(d: dict) -> str:
         <thead><tr><th style="width:19%;">Submission Artifact</th><th style="width:37%;">Verified Content / Scope</th><th style="width:44%;">Access URL / Package Path</th></tr></thead>
         <tbody>
           <tr><td><b>Public GitHub Repository</b></td><td>Track B codebase, 64/64 tests, scripts &amp; docs (<code>main</code> &amp; <code>Amit-Enhanced</code>, no <code>.env</code>)</td><td class="mono" style="word-break:break-all;">https://github.com/bhardwaj-amit79/HR-Policy-Navigator</td></tr>
-          <tr><td><b>10-Minute Demo Video</b></td><td>Live walkthrough: RBAC personas, PTO citations, HITL, Langfuse DAG &amp; Arena</td><td class="mono">[Upload 03_Demo_Recording.mp4 inside Drive folder below]</td></tr>
+          <tr><td><b>10-Minute Demo Video</b></td><td>Live walkthrough: RBAC personas, PTO citations, HITL, Langfuse DAG &amp; Arena</td><td class="mono" style="word-break:break-all;">https://drive.google.com/file/d/12ftxzQxNQ0NI3k4S_mzeyyzAeiu1_qY5/view?usp=drivesdk</td></tr>
           <tr><td><b>Shared Google Drive Folder</b></td><td>Official Group 63 Capstone Bundle (<code>[GroupID: 63] HR_Policy_Navigator</code>)</td><td class="mono" style="word-break:break-all;">https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6</td></tr>
           <tr><td><b>Evaluation Report (6p)</b></td><td>Week 1–4 grids, Pareto Frontier, 4&times;4 Heatmap, Parameter Rationale &amp; UI proofs</td><td class="mono">submission_pack/02_Evaluation_Report.pdf</td></tr>
           <tr><td><b>Presentation Deck (12s)</b></td><td>Executive architecture, empirical findings, live runner/arena &amp; viva Q&amp;A</td><td class="mono">submission_pack/04_Presentation_Slides.pdf</td></tr>
@@ -1452,7 +1452,8 @@ def build_technical_report_html(d: dict) -> str:
       <div style="background:#0F172A; color:#F8FAFC; border-radius:9px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
         <div style="font-size:8.4pt; line-height:1.5;">
           <b>Public GitHub:</b> <span class="mono" style="color:#93C5FD;">https://github.com/bhardwaj-amit79/HR-Policy-Navigator</span> &nbsp;(<code>main</code> &amp; <code>Amit-Enhanced</code>)<br/>
-          <b>Drive Bundle:</b> <span class="mono" style="color:#FDE68A;">https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6</span> &nbsp;&middot;&nbsp; <b>64/64 Pytest &middot; 84/84 Eval &middot; Langfuse v4.86</b>
+          <b>Drive Bundle:</b> <span class="mono" style="color:#FDE68A;">https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6</span><br/>
+          <b>Demo Video:</b> <span class="mono" style="color:#A7F3D0;">https://drive.google.com/file/d/12ftxzQxNQ0NI3k4S_mzeyyzAeiu1_qY5/view?usp=drivesdk</span> &nbsp;&middot;&nbsp; <b>64/64 Pytest &middot; 84/84 Eval &middot; Langfuse v4.86</b>
         </div>
         <div class="mono" style="font-size:10.5pt; font-weight:700; color:#86EFAC; text-align:right;">TRACK B<br/>CERTIFIED</div>
       </div>

@@ -4,7 +4,7 @@
 *Executive Post Graduate Programme in Generative AI and Agentic AI*  
 **Authors:** Amit Bhardwaj, Vivek Duraisamy & Team · **Mentor:** Dr. Gunjan Balde  
 **Public Repository:** `https://github.com/bhardwaj-amit79/HR-Policy-Navigator` (`main` & `Amit-Enhanced`)  
-**Submission Artifacts:** [02_Evaluation_Report.pdf](../submission_pack/02_Evaluation_Report.pdf) · [04_Presentation_Slides.pdf](../submission_pack/04_Presentation_Slides.pdf) · [Google Drive Bundle](https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6) · Demo Video: `Pending 03_Demo_Recording.mp4 upload inside Drive folder`  
+**Submission Artifacts:** [02_Evaluation_Report.pdf](../submission_pack/02_Evaluation_Report.pdf) · [04_Presentation_Slides.pdf](../submission_pack/04_Presentation_Slides.pdf) · [Google Drive Bundle](https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6) · [63-HR Policy Navigator Demo.mp4](https://drive.google.com/file/d/12ftxzQxNQ0NI3k4S_mzeyyzAeiu1_qY5/view?usp=drivesdk)  
 **Date:** November 26, 2026
 
 ---
@@ -24,7 +24,7 @@ Deploying enterprise operations copilots on edge-class ($\le$8B) open-weights mo
 | **6-Page Empirical Evaluation Report** | Week 1–4 grids, Pareto frontier, 4x4 heatmap, parameter rationale & screenshots | [`submission_pack/02_Evaluation_Report.pdf`](../submission_pack/02_Evaluation_Report.pdf) |
 | **12-Slide Presentation Deck** | Executive capstone walkthrough & live defense deck | [`submission_pack/04_Presentation_Slides.pdf`](../submission_pack/04_Presentation_Slides.pdf) |
 | **Shared Google Drive Bundle** | Official UpGrad Group 63 capstone folder (`[GroupID: 63] HR_Policy_Navigator`) | `https://drive.google.com/drive/folders/1b5t8CLQGAehOsGtca0sirI1fS2pAhzK6` |
-| **10-Minute Live Demo Recording** | Live walkthrough of RBAC, grounded PTO citations, HITL, Langfuse DAG & Arena | `[Upload 03_Demo_Recording.mp4 inside Drive folder & link here]` |
+| **10-Minute Live Demo Recording** | Live walkthrough of RBAC, grounded PTO citations, HITL, Langfuse DAG & Arena | `https://drive.google.com/file/d/12ftxzQxNQ0NI3k4S_mzeyyzAeiu1_qY5/view?usp=drivesdk` |
 | **Trace & Execution Telemetry** | Local Langfuse v4.86.0 DAG (`~876` obs) + Offline JSONL (`1,137+` traces) | [`submission_pack/05_Trace_Dashboard/`](../submission_pack/05_Trace_Dashboard/) |
 | **Executed Final UI Captures** | Live Login, Grounded Ask, HITL, RLHF, Evaluation Runner & Bird's Eye View | [`submission_pack/06_Final_UI/`](../submission_pack/06_Final_UI/) |
 | **Git Progression Log (57 Commits)** | Full 4-week chronological engineering commit history & graph | [`submission_pack/07_Progress/git_history/`](../submission_pack/07_Progress/git_history/) |
